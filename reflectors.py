@@ -2,49 +2,15 @@
 import sys
 
 # third-party module imports
-import colorama
 
 # local module imports
 import rotors
 
 
-def vbprint(template, args=[], kwargs={}):
-    """Format and print a message to stderr if verbosity is enabled"""
-    global ENIGMA_verbose
-    if ENIGMA_verbose:
-        sys.stderr.write(template.format(*args, **kwargs) + '\n')
-
-
-def stringToRotor(s):
-    '''Turn a string into an instantiated rotor'''
-    # Get all immediate subclasses of the rotor base class
-    classes = _RotorBase.__subclasses__() + _ByteRotorBase.__subclasses__()
-
-    # split the argument into name and settings
-    split = s.split(':')
-
-    # lookup the rotor
-    name = split[0]
-    rotor = None
-    for c in classes:
-        if name == c._short:
-            rotor = c
-            break
-    if not rotor:
-        raise ValueError(name + ' is not a valid rotor short-name')
-
-    # extract the other settings
-    setting = split[1].upper() if len(split) > 1 else None
-    notches = split[2].upper() if len(split) > 2 else None
-
-    # Instantiate the rotor
-    return rotor(setting=setting, notches=notches)
-
-
-def stringToReflector(s):
+def fromString(s):
     '''Turn a string into an instantiated reflector'''
     # Get all immediate subclasses of the reflector base class
-    classes = _ReflectorBase.__subclasses__() + _ByteReflectorBase.__subclasses__()
+    classes = _ReflectorBase.__subclasses__()
     reflector = None
     for c in classes:
         if s == c._short:

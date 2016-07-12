@@ -1,21 +1,14 @@
 # stdlib module imports
-import sys
 
 # third-party module imports
-import colorama
+
+# local module imports
 
 
-def vbprint(template, args=[], kwargs={}):
-    """Format and print a message to stderr if verbosity is enabled"""
-    global ENIGMA_verbose
-    if ENIGMA_verbose:
-        sys.stderr.write(template.format(*args, **kwargs) + '\n')
-
-
-def stringToRotor(s):
+def fromString(s):
     '''Turn a string into an instantiated rotor'''
     # Get all immediate subclasses of the rotor base class
-    classes = _RotorBase.__subclasses__() + _ByteRotorBase.__subclasses__()
+    classes = _RotorBase.__subclasses__()
 
     # split the argument into name and settings
     split = s.split(':')
@@ -38,22 +31,6 @@ def stringToRotor(s):
     return rotor(setting=setting, notches=notches)
 
 
-def stringToReflector(s):
-    '''Turn a string into an instantiated reflector'''
-    # Get all immediate subclasses of the reflector base class
-    classes = _ReflectorBase.__subclasses__() + _ByteReflectorBase.__subclasses__()
-    reflector = None
-    for c in classes:
-        if s == c._short:
-            reflector = c
-            break
-    if not reflector:
-        raise ValueError(s + ' is not a valid reflector short-name')
-
-    # Instantiate the reflector
-    return reflector()
-
-
 class _RotorBase:
     '''Base rotor class. Inherited by all proper rotors. NOT FOR CRYPTO USE!'''
 
@@ -73,9 +50,6 @@ class _RotorBase:
                 self.setting = self._abet.index(setting)
         else:
             self.setting = 0  # A
-
-        # Initial verbosity flag
-        self.verbose = False
 
         # Calculate the size information
         self.wiring_size = len(self._wiring)
@@ -114,21 +88,6 @@ class _RotorBase:
             if n < self.wiring_start:
                 n += self.wiring_size
         return n
-
-    def vprint(self, template, args=[], kwargs={}):
-        """Format and print a message to stderr if verbosity is enabled"""
-        if self.verbose:
-            kwargs.update({
-                'self': self,
-                'B': colorama.Back,
-                'F': colorama.Fore,
-                'S': colorama.Style
-            })
-            pre = '|{F.GREEN}{self._short:>10}{F.WHITE}:'
-            sys.stderr.write((pre + template).format(*args, **kwargs) + '\n')
-
-    def verbose_soundoff(self):
-        self.vprint('Verbosity enabled')
 
     def step(self):
         '''
