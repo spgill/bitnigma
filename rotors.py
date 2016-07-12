@@ -43,50 +43,30 @@ class _RotorBase:
     def __init__(self, setting=None, notches=None):
         '''Instantiate a new Rotor with custom or default settings'''
         # Initial rotor setting. 0 if not defined.
-        if setting:
-            if self._byte_compatible:
-                self.setting = setting
-            else:
-                self.setting = self._abet.index(setting)
-        else:
-            self.setting = 0  # A
-
-        # Calculate the size information
-        self.wiring_size = len(self._wiring)
-        self.wiring_start = 0
-        self.wiring_end = self.wiring_size - 1
+        self.setting = setting if setting else 0
 
         # Initialize and program wiring matrices
-        self.wiring_forward = list(range(self.wiring_size))
-        self.wiring_reverse = list(range(self.wiring_size))
+        self.wiring_forward = [0 for i in range(256)]
+        self.wiring_reverse = [0 for i in range(256)]
 
-        for i in range(self.wiring_size):
+        for i in range(256):
             x = i
             y = self._wiring[i]
-            if not self._byte_compatible:
-                y = self._abet.index(y)
             self.wiring_forward[x] = y - x
             self.wiring_reverse[y] = x - y
 
         # Initialize the notch matrix
-        self.notches = []
+        self.notches = bytearray(256)
         for notch in notches or self._notches:
-            if self._byte_compatible:
-                self.notches.append(notch)
-            else:
-                self.notches.append(self._abet.index(notch))
-
-    def _shift(self, s, n=1):
-        '''Shift a string by n characters'''
-        return s[n:] + s[0:n]
+            self.notches[notch] = 1
 
     def _loop(self, n):
-        '''Constrain a number N such that 0 <= i <= N in a circular fashion'''
-        while n < self.wiring_start or n > self.wiring_end:
-            if n > self.wiring_end:
-                n -= self.wiring_size
-            if n < self.wiring_start:
-                n += self.wiring_size
+        '''Constrain a number N such that 0 <= i <= 255 in a circle'''
+        while n < 0 or n > 255:
+            if n > 255:
+                n -= 256
+            if n < 0:
+                n += 256
         return n
 
     def step(self):
