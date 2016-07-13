@@ -25,10 +25,9 @@ def fromString(s):
 
     # extract the other settings
     setting = split[1].upper() if len(split) > 1 else None
-    notches = split[2].upper() if len(split) > 2 else None
 
     # Instantiate the rotor
-    return rotor(setting=setting, notches=notches)
+    return rotor(setting=setting)
 
 
 class _Base:
