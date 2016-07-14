@@ -125,13 +125,55 @@ class Machine:
         else:
             return False
 
+    def hexdump(self, data, spaced=False):
+        if not hasattr(data, 'read'):
+            data = io.BytesIO(data)
+        w = sys.stdout.write
+
+        def spacer():
+            w('\n')
+            w('  offset  ')
+            w(' '.join('%02x' % i for i in range(16)))
+            w('\n')
+            w('          _______________________________________________\n')
+
+        spacer()
+        chunk = data.read(16)
+        count = 0
+        i = 0
+
+        while chunk:
+            count += len(chunk)
+            if i % 16 == 0 and i > 0 and spaced:
+                spacer()
+
+            w('%08x |' % (i*16))
+            w(' '.join('%02x' % j for j in chunk))
+            w('\n')
+            chunk = data.read(16)
+            i += 1
+
+        w('\nTotal bytes: ' + str(count) + '\n')
+        w('\n')
+
     def stateGet(self):
         '''Get a serialized state of the machine. (the 'settings')'''
-        return pickle.dumps((
+        s = pickle.dumps((
             self.plugboard,
             self.rotors,
             self.reflector
         ), -1)
+        return s
+
+        # state = io.BytesIO()
+        # state.write(self.plugboard)
+        # state.write(bytes([len(self.rotors)]))
+        # for r in self.rotors:
+        #     state.write(r._wiring)
+        #     state.write(r.notches)
+        #     state.write(bytes([r.setting]))
+        #
+        # state.write(self.reflector._wiring)
 
     def stateSet(self, state):
         '''Set the state of the machine from a serialized input'''
