@@ -111,20 +111,6 @@ class Machine:
                 'Reflector is not byte-compatible'
             )
 
-    def _checkByte(self, b):
-        '''Sanitize a single character'''
-        # Uppercase alpha. Good to go.
-        if b >= 65 and b <= 90:
-            return b
-
-        # Lowercase alpha. Let's capitalize it.
-        elif b >= 97 and b <= 122:
-                return b - 32
-
-        # Invalid character.
-        else:
-            return False
-
     def hexdump(self, data, spaced=False):
         if not hasattr(data, 'read'):
             data = io.BytesIO(data)
