@@ -1,4 +1,5 @@
 # stdlib imports
+import array
 import io
 import pickle
 import random
@@ -51,7 +52,7 @@ class Machine:
     def _initPlugboard(self, stack):
         '''Initialize the plugboard translation matrix'''
         # Start with an untampered matrix
-        self.plugboard = bytearray([i for i in range(256)])
+        self.plugboard = array.array('B', [i for i in range(256)])
 
         # Swap up the mappings for each desired pair
         for pair in stack:
@@ -260,7 +261,7 @@ class Machine:
         Translate a non-empty bytes or bytearray object through the machine.
         """
         # Initialize the outgoing chunk
-        chunk_out = bytearray()
+        chunk_out = array.array('B')
 
         # For bytes, this is super easy
         for byte_in in chunk_in:

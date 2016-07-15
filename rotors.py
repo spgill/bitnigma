@@ -1,4 +1,5 @@
 # stdlib module imports
+import array
 
 # third-party module imports
 
@@ -45,18 +46,18 @@ class _Base:
 
     def _loop(self, n):
         '''Constrain a number N such that 0 <= i <= 255 in a circle'''
-        while n < 0 or n > 255:
-            if n > 255:
-                n -= 256
-            if n < 0:
-                n += 256
-        return n
+        if n > 255:
+            return n - 256
+        elif n < 0:
+            return n + 256
+        else:
+            return n
 
     def setup(self, wiring, notches, setting):
         """Initialize the wiring, notches, and initial rotor setting."""
         # Initialize wiring matrices
-        self.wiring_forward = [0 for i in range(256)]
-        self.wiring_reverse = [0 for i in range(256)]
+        self.wiring_forward = array.array('h', [0 for i in range(256)])
+        self.wiring_reverse = array.array('h', [0 for i in range(256)])
 
         for i in range(256):
             x = i
@@ -65,7 +66,7 @@ class _Base:
             self.wiring_reverse[y] = x - y
 
         # Initialize the notch matrix
-        self.notches = bytearray(256)
+        self.notches = array.array('B', [0 for i in range(256)])
         for notch in notches:
             self.notches[notch] = 1
 
@@ -78,28 +79,21 @@ class _Base:
         Returns True if the rotor hit its notch and the
         next rotor in the series should be advanced by one letter as well
         '''
-        # check for notches
-        notch = False
-        if self.notches[self.setting]:
-            notch = True
-
         # increment rotor index, checking for loop condition
-        self.setting = self._loop(self.setting + 1)
+        self.setting = 0 if self.setting == 255 else self.setting + 1
 
-        # return the flag
-        return notch
+        # Return whether a notch was hit
+        return self.notches[self.setting]
 
     def translateForward(self, pin_in):
         '''Translate one pin through this rotor in first pass mode.'''
         modifier = self.wiring_forward[self._loop(pin_in + self.setting)]
-        out = self._loop(pin_in + modifier)
-        return out
+        return self._loop(pin_in + modifier)
 
     def translateReverse(self, pin_in):
         '''Translate one pin through this rotor in reverse pass mode.'''
         modifier = self.wiring_reverse[self._loop(pin_in + self.setting)]
-        out = self._loop(pin_in + modifier)
-        return out
+        return self._loop(pin_in + modifier)
 
 
 class Custom(_Base):
