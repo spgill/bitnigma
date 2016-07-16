@@ -55,6 +55,10 @@ class _Base:
 
     def setup(self, wiring, notches, setting):
         """Initialize the wiring, notches, and initial rotor setting."""
+        # Node relative references
+        self.next = None
+        self.previous = None
+
         # Initialize wiring matrices
         self.wiring_forward = array.array('h', [0 for i in range(256)])
         self.wiring_reverse = array.array('h', [0 for i in range(256)])
@@ -83,17 +87,29 @@ class _Base:
         self.setting = 0 if self.setting == 255 else self.setting + 1
 
         # Return whether a notch was hit
-        return self.notches[self.setting]
+        if self.notches[self.setting] and self.next:
+            self.next.step()
+
+    def translate(self, pin):
+        """Start the recursive(ish) translation process."""
+        return self.translateForward(pin)
 
     def translateForward(self, pin_in):
         '''Translate one pin through this rotor in first pass mode.'''
         modifier = self.wiring_forward[self._loop(pin_in + self.setting)]
-        return self._loop(pin_in + modifier)
+        pin = self._loop(pin_in + modifier)
+        if self.next:
+            return self.next.translateForward(pin)
+        return self.previous.translateReverse(pin)
 
     def translateReverse(self, pin_in):
         '''Translate one pin through this rotor in reverse pass mode.'''
         modifier = self.wiring_reverse[self._loop(pin_in + self.setting)]
-        return self._loop(pin_in + modifier)
+        pin = self._loop(pin_in + modifier)
+        if self.previous:
+            return self.previous.translateReverse(pin)
+        return pin
+
 
 
 class Custom(_Base):

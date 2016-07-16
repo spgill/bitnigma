@@ -46,6 +46,9 @@ class Machine:
             self._initRotors(rotorStack)
             self._initReflector(reflector)
 
+        # Link all of the rotors and reflectors together
+        self._link()
+
         # go ahead and set a break point
         self.breakSet()
 
@@ -111,6 +114,20 @@ class Machine:
             raise ValueError(
                 'Reflector is not byte-compatible'
             )
+
+    def _link(self):
+        """Link the rotors and reflectors together in a node-like fashion"""
+        # Link the rotors forward
+        for i in range(len(self.rotors))[:-1]:
+            self.rotors[i].next = self.rotors[i + 1]
+
+        # Link the rotors backwards
+        for i in range(len(self.rotors))[1:]:
+            self.rotors[i].previous = self.rotors[i - 1]
+
+        # Link the reflector into the loop
+        self.rotors[-1].next = self.reflector
+        self.reflector.previous = self.rotors[-1]
 
     def hexdump(self, data, spaced=False):
         if not hasattr(data, 'read'):
@@ -219,39 +236,25 @@ class Machine:
         assert hasattr(self, '_breakstate')
         self.stateSet(self._breakstate)
 
-    def stepRotors(self):
-        """Step the machine's rotors once, in order."""
-        step = True
-        for rotor in self.rotors:
-            if step:
-                step = rotor.step()
-                if not step:
-                    break
-
     def translatePin(self, pin):
         """
         Translate a singular pin (as an integer) through the plugboard,
         rotors, reflector, and back again.
         """
+        # Isolate the first (maybe only) rotor
+        rotor = self.rotors[0]
+
         # Forward through the plugboard
         pin = self.plugboard[pin]
 
-        # Forward through the rotors
-        for rotor in self.rotors:
-            pin = rotor.translateForward(pin)
-
-        # Reflect it
-        pin = self.reflector.translateForward(pin)
-
-        # Backwards through the rotors
-        for rotor in reversed(self.rotors):
-            pin = rotor.translateReverse(pin)
+        # Send the pin through the rotors
+        pin = rotor.translate(pin)
 
         # Backwards through the plugboard
         pin = self.plugboard[pin]
 
         # Step the rotors
-        self.stepRotors()
+        rotor.step()
 
         # Return the fruits of our labor
         return pin
