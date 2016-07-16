@@ -327,9 +327,9 @@ def main():
 
     # Progress callback
     def callback(current, total):
-        rs = ' '.join(['{0:03d}'.format(r.setting) for r in machine.rotors])
+        rs = ' '.join(['{0:02x}'.format(r.setting) for r in machine.rotors])
         sys.stderr.write(
-            'ROTORS: ' + rs + '    ' +
+            'ROTORS: ' + rs + ' ' +
             'PROGRESS: ' + str(int(current / total * 100.0)) + '%\r'
         )
 
