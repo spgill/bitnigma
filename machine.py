@@ -6,7 +6,6 @@ import random
 import sys
 
 # third party imports
-import colorama
 
 # local module imports
 import rotors
