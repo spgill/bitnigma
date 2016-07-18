@@ -117,7 +117,7 @@ class Machine:
         self.reflector.previous = self.rotors[-1]
 
     def stateGet(self):
-        """Get a serialized state of the machine. (the 'settings')
+        """Get a serialized state of the machine.
 
         Results in a byte string that is (513 + i * (258 + j)) bytes long,
         where i is the number of rotors in the machine, and j is the number
