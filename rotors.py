@@ -65,7 +65,7 @@ class _Base:
 
         for i in range(256):
             x = i
-            y = self._wiring[i]
+            y = wiring[i]
             self.wiring_forward[x] = y - x
             self.wiring_reverse[y] = x - y
 

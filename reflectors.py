@@ -46,7 +46,7 @@ class Custom(_Base):
     _wiring = None
 
     def __init__(self, wiring):
-        self.setup(wiring, [], None)
+        self.setup(wiring, [], 0)
 
 
 class ByteA(_Base):
