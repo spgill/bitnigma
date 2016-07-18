@@ -55,6 +55,11 @@ class _Base:
 
     def setup(self, wiring, notches, setting):
         """Initialize the wiring, notches, and initial rotor setting."""
+        # Save the initial setup parameters (useful for serialization)
+        self.initial_wiring = wiring
+        self.initial_notches = notches
+        self.initial_setting = setting
+
         # Node relative references
         self.next = None
         self.previous = None

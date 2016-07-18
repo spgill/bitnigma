@@ -221,7 +221,7 @@ def main():
     # Initialize the enigma machine using specified rotors or a state file
     machine = None
     if args.state and not args.state_create:
-        state = bz2.open(args.state, 'rb').read()
+        state = open(args.state, 'rb').read()
         machine = emachine.Machine(state=state)
     elif args.state_seed:
         machine = emachine.Machine(stateSeed=args.state_seed)
@@ -236,7 +236,7 @@ def main():
 
     # If a state file needs to be created, save it and exit
     if args.state_create:
-        return bz2.open(args.state, 'wb').write(machine.stateGet())
+        return open(args.state, 'wb').write(machine.stateGet())
 
     # If the state shall be printed, make it so, and exit
     if args.state_print:

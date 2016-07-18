@@ -83,12 +83,6 @@ class Machine:
                     'Unknown type of rotor passed into the machine'
                 )
 
-            # Make sure the rotor matches the mode
-            if len(rotor._wiring) < 256:
-                raise ValueError(
-                    'Rotor is not byte-compatible'
-                )
-
             # Append it, yo
             self.rotors.append(rotor)
 
@@ -108,12 +102,6 @@ class Machine:
                 'Unknown type of reflector passed into the machine'
             )
 
-        # Make sure the reflector matches the mode
-        if len(self.reflector._wiring) < 256:
-            raise ValueError(
-                'Reflector is not byte-compatible'
-            )
-
     def _link(self):
         """Link the rotors and reflectors together in a node-like fashion"""
         # Link the rotors forward
@@ -128,63 +116,76 @@ class Machine:
         self.rotors[-1].next = self.reflector
         self.reflector.previous = self.rotors[-1]
 
-    def hexdump(self, data, spaced=False):
-        if not hasattr(data, 'read'):
-            data = io.BytesIO(data)
-        w = sys.stdout.write
-
-        def spacer():
-            w('\n')
-            w('  offset  ')
-            w(' '.join('%02x' % i for i in range(16)))
-            w('\n')
-            w('          _______________________________________________\n')
-
-        spacer()
-        chunk = data.read(16)
-        count = 0
-        i = 0
-
-        while chunk:
-            count += len(chunk)
-            if i % 16 == 0 and i > 0 and spaced:
-                spacer()
-
-            w('%08x |' % (i*16))
-            w(' '.join('%02x' % j for j in chunk))
-            w('\n')
-            chunk = data.read(16)
-            i += 1
-
-        w('\nTotal bytes: ' + str(count) + '\n')
-        w('\n')
-
     def stateGet(self):
-        '''Get a serialized state of the machine. (the 'settings')'''
-        s = pickle.dumps((
-            self.plugboard,
-            self.rotors,
-            self.reflector
-        ), -1)
-        return s
+        """Get a serialized state of the machine. (the 'settings')
 
-        # state = io.BytesIO()
-        # state.write(self.plugboard)
-        # state.write(bytes([len(self.rotors)]))
-        # for r in self.rotors:
-        #     state.write(r._wiring)
-        #     state.write(r.notches)
-        #     state.write(bytes([r.setting]))
-        #
-        # state.write(self.reflector._wiring)
+        Results in a byte string that is (513 + i * (258 + j)) bytes long,
+        where i is the number of rotors in the machine, and j is the number
+        of notches in each rotor.
+        """
+        # Start with a blank buffer
+        state = io.BytesIO()
+
+        # Write the plugboard config
+        state.write(self.plugboard)
+
+        # Write the number of rotors
+        state.write(bytes([len(self.rotors)]))
+
+        # Iterate through the rotors
+        for r in self.rotors:
+
+            # Write the wiring
+            state.write(r.initial_wiring)
+
+            # Write the number of notches
+            state.write(bytes([len(r.initial_notches)]))
+
+            # Write the actual notches
+            state.write(bytes(r.initial_notches))
+
+            # Write the rotor setting
+            state.write(bytes([r.setting]))
+
+        # Write the reflector wiring
+        state.write(self.reflector.initial_wiring)
+
+        # Return it all
+        state.seek(0)
+        return state.read()
 
     def stateSet(self, state):
-        '''Set the state of the machine from a serialized input'''
-        (
-            self.plugboard,
-            self.rotors,
-            self.reflector
-        ) = pickle.loads(state)
+        """Set the state of the machine from a serialized input"""
+        # First, let's read it into a buffer
+        state = io.BytesIO(state)
+
+        # Unpack the plugboard
+        self.plugboard = array.array('B', state.read(256))
+
+        # Get the number of rotors
+        rotor_count = state.read(1)[0]
+
+        # Iterate through and unpack the rotors
+        for i in range(rotor_count):
+
+            # Unpack the wiring
+            wiring = state.read(256)
+
+            # Get the notches
+            notch_count = state.read(1)[0]
+            notches = state.read(notch_count)
+
+            # Lastly, get the setting
+            setting = state.read(1)[0]
+
+            # Wrap it all up into a Custom rotor instance
+            self.rotors.append(rotors.Custom(wiring, notches, setting))
+
+        # Unpack and initialize the reflector
+        self.reflector = reflectors.Custom(state.read(256))
+
+        # Last but not least, we must link the components
+        self._link()
 
     def stateRandom(self, seed):
         """Randomly generate a state from a string seed"""
