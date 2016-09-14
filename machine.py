@@ -8,8 +8,8 @@ import sys
 # third party imports
 
 # local module imports
-import rotors
-import reflectors
+import bitnigma.rotors as rotors
+import bitnigma.reflectors as reflectors
 
 
 class Machine:
@@ -58,8 +58,18 @@ class Machine:
 
         # Swap up the mappings for each desired pair
         for pair in stack:
-            x = pair[0]
-            y = pair[1]
+            x = 0
+            y = 0
+
+            # If a string pairing
+            if isinstance(pair, str):
+                [x, y] = [int(n) for n in pair.split(':')]
+
+            # Else, must be some sort of list
+            else:
+                [x, y] = pair
+
+            # Store them in the plugboard
             self.plugboard[x] = y
             self.plugboard[y] = x
 

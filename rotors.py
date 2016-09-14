@@ -25,7 +25,7 @@ def fromString(s):
         raise ValueError(name + ' is not a valid rotor short-name')
 
     # extract the other settings
-    setting = split[1].upper() if len(split) > 1 else 0
+    setting = int(split[1]) if len(split) > 1 else 0
 
     # Instantiate the rotor
     return rotor(setting=setting)

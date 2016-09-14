@@ -3,7 +3,7 @@
 # third-party module imports
 
 # local module imports
-import rotors
+import bitnigma.rotors as rotors
 
 
 def fromString(s):

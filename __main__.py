@@ -5,25 +5,32 @@ import datetime
 import io
 import sys
 
+# third party import
+import colorama
+
 # local module imports
-import machine as emachine
-import rotors
+import bitnigma.machine as bitmachine
+import bitnigma.rotors as rotors
 
 
 def _serialize_plugboard(stack):
     """Serialize a plugboard stack back into character pairings"""
-    pairs = []
-    for i in range(26):
-        if stack[i] is None:
-            continue
+    pairs = [None for i in range(256)]
+
+    # Yield the pairs that are not 1:1 and are not already present in reverse
+    for i in range(256):
         if stack[i] != i:
-            x = i
-            y = stack[i]
-            pairs.append(
-                rotors._RotorBase._abet[x] + rotors._RotorBase._abet[y]
-            )
-            stack[y] = None
-    return pairs
+            if not pairs[stack[i]]:
+                pairs[i] = stack[i]
+                yield '{0}:{1}'.format(i, stack[i])
+
+
+def _serialize_notches(notches):
+    """Serialize a rotor's notch matrix."""
+    for i in range(256):
+        if notches[i]:
+            yield str(i)
+
 
 def main():
     """Main method (seems kinda redundant in the main file but w/e)"""
@@ -40,8 +47,8 @@ def main():
         type=str,
         required=False,
         help="""
-        Specify a list of character pairings for the plugboard.
-        ex; AB CF HJ
+        Specify a list of byte pairings for the plugboard.
+        ex; 10:25 50:77 102:33
         """
     )
     parser.add_argument(
@@ -51,14 +58,17 @@ def main():
         required=False,
         help="""
         Specify a list of rotors in the following format:
-        SHORTNAME[:SETTING[:NOTCHES]]
-        ex; com1:C:QV
+        SHORTNAME[:SETTING]
+        ex; byte1:52
         """
     )
     parser.add_argument(
         '--reflector', '-rf',
         type=str,
-        required=False
+        required=False,
+        help="""
+        Specify a reflector by its shortname.
+        """
     )
 
     # State args
@@ -194,24 +204,6 @@ def main():
         Suppress the progress meter that is normal written to stderr.
         """
     )
-    parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        required=False,
-        help="""
-        Enable verbosity; printing LOTS of messages to stderr.
-        """
-    )
-    parser.add_argument(
-        '--typewriter', '-t',
-        action='store_true',
-        required=False,
-        help="""
-        Enable typewriter mode. Press a key, and the translated key is written
-        to the console; similar to an actual enigma machine. Not particularly
-        useful, just really cool to play with. (currently Windows only)
-        """
-    )
 
     if len(sys.argv) == 1:
         print('("--help" flag inferred from no args)\n')
@@ -222,13 +214,13 @@ def main():
     machine = None
     if args.state and not args.state_create:
         state = open(args.state, 'rb').read()
-        machine = emachine.Machine(state=state)
+        machine = bitmachine.Machine(state=state)
     elif args.state_seed:
-        machine = emachine.Machine(stateSeed=args.state_seed)
+        machine = bitmachine.Machine(stateSeed=args.state_seed)
     else:
         if not args.rotors or not args.reflector:
             raise ValueError('Rotors and reflectors were not provided')
-        machine = emachine.Machine(
+        machine = bitmachine.Machine(
             plugboardStack=args.plugboard,
             rotorStack=args.rotors,
             reflector=args.reflector
@@ -243,43 +235,12 @@ def main():
         print('PLUGBOARD:', ' '.join(_serialize_plugboard(machine.plugboard)))
         for i, rotor in enumerate(machine.rotors):
             print(
-                'ROTOR:', i + 1, rotor._name,
-                'SETTING:', rotor._abet[rotor.setting],
-                'NOTCHES:', ', '.join([rotor._abet[n] for n in rotor.notches])
+                'ROTOR', i + 1, ':', rotor._name,
+                'SETTING:', rotor.setting,
+                'NOTCHES:', ', '.join(_serialize_notches(rotor.notches))
             )
         print('REFLECTOR:', machine.reflector._name)
         # print('RAW:', machine.stateGet())
-        return
-
-    # Typewriter mode
-    if args.typewriter:
-        print('Welcome to typewriter mode! To begin transcoding, just type!')
-        print('Press Ctrl+C to exit. (backspace and arrow keys will not work)')
-        print()
-
-        import msvcrt
-        char_in = msvcrt.getch()
-
-        while char_in != b'\x03':
-
-            char_out = char_in
-
-            if char_in == b'\r':
-                char_out = b'\r\n'
-
-            elif char_in == b'\x08':
-                char_out = b''
-
-            else:
-                char_out = machine.translateChunk(
-                    char_in,
-                    sanitize=args.sanitize
-                )
-
-            sys.stdout.buffer.write(char_out)
-            sys.stdout.flush()
-            char_in = msvcrt.getch()
-
         return
 
     # Work out the input
@@ -297,6 +258,11 @@ def main():
     elif args.input_path:
         input_file = open(args.input_path, 'rb')
 
+    # Make sure at least ONE input type was given
+    if not (args.input or args.input_std or args.input_path):
+        print(colorama.Fore.RED + 'No input specified. Exiting.')
+        return
+
     # Check for decompression flag
     if args.input_bz2:
         input_file = io.BytesIO(bz2.decompress(input_file.read()))
@@ -311,6 +277,11 @@ def main():
     # output to a file
     elif args.output_path:
         output_file = open(args.output_path, 'wb')
+
+    # Make sure at least ONE output type was given
+    if not (args.output_std or args.output_path):
+        print(colorama.Fore.RED + 'No output specified. Exiting.')
+        return
 
     # check for compression flag
     output_file_final = None
