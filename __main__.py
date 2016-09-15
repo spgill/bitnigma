@@ -77,15 +77,18 @@ def main():
         default='',
         required=False,
         help="""
-        Path for the state file (loading or creating).
-        Can be used in lieu of manually specifying rotors and reflectors.
+        Path for the state file (reading or writing). States can be used in
+        lieu of manually specifying rotors and reflectors every time.
         """
     )
     parser.add_argument(
         '--state-create', '-sc',
         action='store_true',
         required=False,
-        help='Take the rotor and reflector args and save it to the state file.'
+        help="""
+        Take the plugboard, rotor, and reflector args and save them to the
+        state file (and then exit).
+        """
     )
     parser.add_argument(
         '--state-update', '-su',
@@ -94,7 +97,7 @@ def main():
         help="""
         After processing, save the changed rotor state back to the state file.
         This allows for a continuous rotor progression over multiple
-        script invocations. THERE IS NO ROLLBACK, SO BACK IT UP.
+        program invocations. THERE IS NO ROLLBACK, SO BACK UP THE STATE.
         """
     )
     parser.add_argument(
@@ -102,7 +105,7 @@ def main():
         action='store_true',
         required=False,
         help="""
-        Print the state information to stdout and exit.
+        Print the state information to stdout and then exit.
         """
     )
     parser.add_argument(
@@ -111,7 +114,7 @@ def main():
         default='',
         required=False,
         help="""
-        String seed for a randomly generated state.
+        String seed for to create a randomly generated state.
         """
     )
 
@@ -184,7 +187,7 @@ def main():
         action='store_true',
         required=False,
         help="""
-        Suppress the progress meter that is normal written to stderr.
+        Suppress the progress meter that is normally written to stderr.
         """
     )
 
