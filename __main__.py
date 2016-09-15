@@ -202,7 +202,7 @@ def main():
         state = open(args.state, 'rb').read()
         machine = bitmachine.Machine(state=state)
     elif args.state_seed:
-        machine = bitmachine.Machine(stateSeed=args.state_seed)
+        machine = bitmachine.RandomMachine(seed=args.state_seed)
     else:
         if not args.rotors or not args.reflector:
             raise ValueError('Rotors and reflectors were not provided')
