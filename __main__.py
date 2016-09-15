@@ -1,6 +1,5 @@
 # stdlib imports
 import argparse
-import bz2
 import datetime
 import io
 import sys
@@ -143,14 +142,6 @@ def main():
         Open and read data from file path.
         """
     )
-    parser.add_argument(
-        '--input-bz2', '-iz',
-        action='store_true',
-        required=False,
-        help="""
-        Run input through BZ2 decompression before processing.
-        """
-    )
 
     # Output args
     parser.add_argument(
@@ -167,14 +158,6 @@ def main():
         required=False,
         help="""
         Write output to the specified file path.
-        """
-    )
-    parser.add_argument(
-        '--output-bz2', '-oz',
-        action='store_true',
-        required=False,
-        help="""
-        Run output through BZ2 compression before writing.
         """
     )
 
@@ -263,10 +246,6 @@ def main():
         print(colorama.Fore.RED + 'No input specified. Exiting.')
         return
 
-    # Check for decompression flag
-    if args.input_bz2:
-        input_file = io.BytesIO(bz2.decompress(input_file.read()))
-
     # Now let's work out the output
     output_file = None
 
@@ -282,12 +261,6 @@ def main():
     if not (args.output_std or args.output_path):
         print(colorama.Fore.RED + 'No output specified. Exiting.')
         return
-
-    # check for compression flag
-    output_file_final = None
-    if args.output_bz2:
-        output_file_final = output_file
-        output_file = io.BytesIO()
 
     # get the size of the input
     input_file.seek(0, 2)
@@ -314,12 +287,6 @@ def main():
         chunkSize=args.chunk_size,
         progressCallback=callback
     )
-
-    # Final compression bit
-    if args.output_bz2:
-        output_file.seek(0)
-        mid = bz2.compress(output_file.read())
-        output_file_final.write(mid)
 
     # Collect time for benchmarking
     if args.benchmark:
