@@ -19,4 +19,4 @@ elif sys.argv[1] == 'rotor':
     print('WIRING')
     print(bytes(random.sample(population, 256)))
     print('NOTCHES')
-    print(random.sample(population, 3))
+    print(random.sample(population, 16))
