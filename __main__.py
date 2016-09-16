@@ -117,6 +117,15 @@ def main():
         String seed for to create a randomly generated state.
         """
     )
+    parser.add_argument(
+        '--state-seed-file', '-ssf',
+        type=str,
+        default='',
+        required=False,
+        help="""
+        File to use as seed for a randomly generated state.
+        """
+    )
 
     # Input args
     parser.add_argument(
@@ -202,7 +211,9 @@ def main():
         state = open(args.state, 'rb').read()
         machine = bitmachine.Machine(state=state)
     elif args.state_seed:
-        machine = bitmachine.RandomMachine(seed=args.state_seed)
+        machine = bitmachine.RandomMachine(seed_string=args.state_seed)
+    elif args.state_seed_file:
+        machine = bitmachine.RandomMachine(seed_file=args.state_seed_file)
     else:
         if not args.rotors or not args.reflector:
             raise ValueError('Rotors and reflectors were not provided')

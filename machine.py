@@ -302,10 +302,18 @@ class RandomMachine(Machine):
         'rotor_notch_max': 3
     }
 
-    def __init__(self, seed, override={}):
+    def __init__(self, seed_string=None, seed_file=None, override={}):
         """Initialize the random machine."""
         # Seed the random generator
-        random.seed(seed)
+        if seed_string:
+            random.seed(seed_string)
+        elif seed_file:
+            seed_obj = seed_file
+            if isinstance(seed_file, str):
+                seed_obj = open(seed_file, 'rb')
+            random.seed(seed_obj.read())
+        else:
+            raise RuntimeError('No seed given to RandomMachine')
 
         # Figure out the config params
         config = self._defaultconfig.copy()
