@@ -9,15 +9,17 @@ using the same basic mechanics as the original Enigma machine.
 
 Technical Details
 ---
-* Developed and tested on Python 3.5.2 for Windows
-    * support for other versions and operating systems is likely, but not guaranteed
-* Designed to be run as a module, but can be initiated from the ```__main__.py``` script
+* Developed and tested on Python 3.5.2 for Windows.
+    * support for other versions and operating systems is likely, but not guaranteed.
+* Designed to be run as a module, but can be initiated from the ```__main__.py``` script.
+* Can be imported and used in your own applications, but no documentation is provided yet (though it shouldn't be too hard to figure out).
+* Requires ```requests``` module and internet connection to build (because of the markdown conversion).
 
 Downloading
 ---
-This package is not currently available on PyPI, but may be installed using ```pip``` with the following command;
+This package is now available on PyPI, and may be installed using ```pip install bitnigma``` or
+directly from the repo using ```pip install git+git://github.com/spgill/bitnigma```.
 
-```pip install git+git://github.com/spgill/bitnigma```
 
 Usage
 ---
