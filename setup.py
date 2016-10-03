@@ -21,13 +21,13 @@ def readme():
 
 setuptools.setup(
     name='bitnigma',
-    version='1.0.1',
+    version='1.0.2',
     description='Python byte-enabled Enigma-like simulation.',
     long_description=readme(),
     keywords='enigma machine encrypt encryption rotor rotors',
     author='Samuel P. Gillispie II',
     author_email='spgill@vt.edu',
-    url='https://github.com/spgill/enigma',
+    url='https://github.com/spgill/bitnigma',
     license='MIT',
     packages=['bitnigma'],
     install_requires=[
