@@ -20,3 +20,16 @@ elif sys.argv[1] == 'rotor':
     print(bytes(random.sample(population, 256)))
     print('NOTCHES')
     print(random.sample(population, 16))
+
+elif sys.argv[1] == 'pattern':
+    with open(sys.argv[2], 'wb') as file:
+        total = eval(sys.argv[3])
+        pattern = bytes([int(i) for i in sys.argv[4:]])
+        count = 0
+        while count < total:
+            remaining = total - count
+            if len(pattern) > remaining:
+                file.write(pattern[:remaining])
+            else:
+                file.write(pattern)
+            count += len(pattern)
