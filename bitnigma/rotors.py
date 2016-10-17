@@ -91,7 +91,7 @@ class _Base:
         # increment rotor index, checking for loop condition
         self.setting = 0 if self.setting == 255 else self.setting + 1
 
-        # Return whether a notch was hit
+        # If a notch is hit, increment the next in the series
         if self.notches[self.setting] and self.next:
             self.next.step()
 
