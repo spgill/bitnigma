@@ -257,7 +257,7 @@ def main():
 
     # Make sure at least ONE input type was given
     if not (args.input or args.input_std or args.input_path):
-        print(colorama.Fore.RED + 'No input specified. Exiting.')
+        print(colorama.Fore.RED + 'No input specified. Exiting.' + colorama.Style.RESET_ALL)
         return
 
     # Now let's work out the output
