@@ -19,7 +19,7 @@ elif sys.argv[1] == 'rotor':
     print('WIRING')
     print(bytes(random.sample(population, 256)))
     print('NOTCHES')
-    print(random.sample(population, 16))
+    print(random.sample(population, random.randint(10, 20)))
 
 elif sys.argv[1] == 'pattern':
     with open(sys.argv[2], 'wb') as file:
