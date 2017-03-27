@@ -5,7 +5,6 @@ import io
 import sys
 
 # third party import
-import colorama
 
 # local module imports
 import bitnigma.machine as bitmachine
@@ -32,7 +31,7 @@ def _serialize_notches(notches):
 
 
 def main():
-    """Main method (seems kinda redundant in the main file but w/e)"""
+    """Main method"""
     # Define the master parser
     parser = argparse.ArgumentParser(
         description='Process some data through a simulated Enigma machine'
@@ -40,7 +39,7 @@ def main():
 
     # Rotor args
     parser.add_argument(
-        '--plugboard', '-p',
+        '--plugboard', '-pl',
         nargs='+',
         default=[],
         type=str,
@@ -192,11 +191,11 @@ def main():
         """
     )
     parser.add_argument(
-        '--no-progress', '-np',
+        '--progress', '-p',
         action='store_true',
         required=False,
         help="""
-        Suppress the progress meter that is normally written to stderr.
+        Show the progress meter; written to stderr.
         """
     )
 
@@ -257,7 +256,7 @@ def main():
 
     # Make sure at least ONE input type was given
     if not (args.input or args.input_std or args.input_path):
-        print(colorama.Fore.RED + 'No input specified. Exiting.' + colorama.Style.RESET_ALL)
+        print('No input specified.')
         return
 
     # Now let's work out the output
@@ -273,7 +272,7 @@ def main():
 
     # Make sure at least ONE output type was given
     if not (args.output_std or args.output_path):
-        print(colorama.Fore.RED + 'No output specified. Exiting.')
+        print('No output specified.')
         return
 
     # get the size of the input
@@ -285,14 +284,14 @@ def main():
 
     # Progress callback
     def callback(current, total):
-        rs = ' '.join(['{0:02x}'.format(r.setting) for r in machine.rotors])
+        rs = ' '.join([f'0x{r.setting:02x}' for r in machine.rotors])
+        p = min(int(current / total * 100.0), 100)
         sys.stderr.write(
-            'ROTORS: ' + rs + ' ' +
-            'PROGRESS: ' + str(int(current / total * 100.0)) + '%\r'
+            f'ROTORS: {rs} PROGRESS: {p}%     \r'
         )
 
     # Flip it off if needed
-    if args.no_progress:
+    if not args.progress:
         callback = None
 
     machine.translateStream(
@@ -301,6 +300,10 @@ def main():
         chunkSize=args.chunk_size,
         progressCallback=callback
     )
+
+    # Add an extra return for the progress meter
+    if callback:
+        print()
 
     # Collect time for benchmarking
     if args.benchmark:
