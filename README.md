@@ -9,11 +9,11 @@ using the same basic mechanics as the original Enigma machine.
 
 Technical Details
 ---
-* Developed and tested on Python 3.5.2 for Windows.
-    * support for other versions and operating systems is likely, but not guaranteed.
-* Designed to be run as a module, but can be initiated from the ```__main__.py``` script.
+* Developed and tested on Python 3.6.1 for Windows.
+    * support for other python versions (>= 3.6.0) and other operating systems is likely, but not guaranteed.
+* Designed to be invoked as a module, but can be run from the ```__main__.py``` script just as well.
 * Can be imported and used in your own applications, but no documentation is provided yet (though it shouldn't be too hard to figure out).
-* Requires ```requests``` module and internet connection to build (because of the markdown conversion).
+* Requires ```requests``` module and internet connection to correctly build readme (conversion from Markdown to reStructuredText).
 
 Downloading
 ---
@@ -24,20 +24,20 @@ directly from the repo using ```pip install git+git://github.com/spgill/bitnigma
 Usage
 ---
 ```
-usage: __main__.py [-h] [--plugboard PLUGBOARD [PLUGBOARD ...]]
+usage: python -m bitnigma [-h] [--plugboard PLUGBOARD [PLUGBOARD ...]]
                    [--rotors ROTORS [ROTORS ...]] [--reflector REFLECTOR]
                    [--state STATE] [--state-create] [--state-update]
                    [--state-print] [--state-seed STATE_SEED]
                    [--state-seed-file STATE_SEED_FILE] [--input INPUT]
                    [--input-std] [--input-path INPUT_PATH] [--output-std]
                    [--output-path OUTPUT_PATH] [--chunk-size CHUNK_SIZE]
-                   [--benchmark] [--no-progress]
+                   [--benchmark] [--progress]
 
 Process some data through a simulated Enigma machine
 
 optional arguments:
   -h, --help            show this help message and exit
-  --plugboard PLUGBOARD [PLUGBOARD ...], -p PLUGBOARD [PLUGBOARD ...]
+  --plugboard PLUGBOARD [PLUGBOARD ...], -pl PLUGBOARD [PLUGBOARD ...]
                         Specify a list of byte pairings for the plugboard. ex;
                         10:25 50:77 102:33
   --rotors ROTORS [ROTORS ...], -ro ROTORS [ROTORS ...]
@@ -72,7 +72,5 @@ optional arguments:
                         Chunk size for reading and writing data.
   --benchmark, -b       Benchmark the processing time (prints results to
                         stderr).
-  --no-progress, -np    Suppress the progress meter that is normally written
-                        to stderr.
-
+  --progress, -p        Show the progress meter; written to stderr.
 ```
