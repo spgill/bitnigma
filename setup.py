@@ -24,7 +24,7 @@ def readme():
 
 setuptools.setup(
     name='bitnigma',
-    version='1.0.4',
+    version='1.1.0',
     description='Python byte-enabled Enigma-like simulation.',
     long_description=readme(),
     keywords='enigma machine encrypt encryption rotor rotors',
