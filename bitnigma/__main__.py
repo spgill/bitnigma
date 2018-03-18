@@ -41,9 +41,9 @@ def cliRoot():
 
 # Command to generate a certificate file
 @cliRoot.command(name='gencert')
-@click.option('--seed', type=str)
-@click.option('--seed-file', type=click.File('rb'))
 def commandGenerate(seed, seed_file):
+@click.option('--seed', '-s', type=str)
+@click.option('--seed-file', '-sf', type=click.File('rb'))
     # You must have either a seed or a seed file
     if seed is None and seed_file is None:
         raise click.ClickException('You must specify one of the seed options.')
