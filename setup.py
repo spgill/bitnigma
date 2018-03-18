@@ -33,7 +33,7 @@ setuptools.setup(
     url='https://github.com/spgill/bitnigma',
     license='MIT',
     packages=['bitnigma'],
-    install_requires=[],
+    install_requires=['click', 'colorama'],
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Developers',
