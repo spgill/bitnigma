@@ -2,6 +2,7 @@
 import argparse
 import binascii
 import datetime
+import hashlib
 import io
 import sys
 import uuid
@@ -41,9 +42,10 @@ def cliRoot():
 
 # Command to generate a certificate file
 @cliRoot.command(name='gencert')
-def commandGenerate(seed, seed_file):
 @click.option('--seed', '-s', type=str)
 @click.option('--seed-file', '-sf', type=click.File('rb'))
+@click.option('--out', '-o', type=click.File('w'))
+def commandGenerate(seed, seed_file, out):
     # You must have either a seed or a seed file
     if seed is None and seed_file is None:
         raise click.ClickException('You must specify one of the seed options.')
@@ -53,15 +55,22 @@ def commandGenerate(seed, seed_file):
         seed_string=seed,
         seed_file=seed_file
     )
-    stateHex = binascii.hexlify(machine.stateGet()).decode()
+    machineState = machine.stateGet()
+    stateHash = hashlib.blake2s(machineState).hexdigest()
+    stateHex = binascii.hexlify(machineState).decode()
 
     # Generate the certificate document
     document = ''
-    document += uuid.uuid4().hex + '\n'
+    document += str(uuid.uuid4()) + '\n'
     document += datetime.datetime.utcnow().isoformat() + '\n'
+    document += stateHash + '\n'
     document += stateHex
 
-    click.echo(document)
+    # Write it to the output file, if supplied
+    if out:
+        out.write(document)
+    else:
+        click.echo(document)
 
 
 # If this is the main script, invoke the CLI
