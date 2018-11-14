@@ -46,12 +46,7 @@ class _Base:
 
     def _loop(self, n):
         '''Constrain a number N such that 0 <= i <= 255 in a circle'''
-        if n > 255:
-            return n - 256
-        elif n < 0:
-            return n + 256
-        else:
-            return n
+        return n % 256
 
     def setup(self, wiring, notches, setting):
         """Initialize the wiring, notches, and initial rotor setting."""
@@ -88,8 +83,8 @@ class _Base:
         Returns True if the rotor hit its notch and the
         next rotor in the series should be advanced by one letter as well
         '''
-        # increment rotor index, checking for loop condition
-        self.setting = 0 if self.setting == 255 else self.setting + 1
+        # increment rotor index, in a loop
+        self.setting = self._loop(self.setting + 1)
 
         # If a notch is hit, increment the next in the series
         if self.notches[self.setting] and self.next:
