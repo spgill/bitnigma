@@ -257,36 +257,56 @@ class Machine:
         return size
 
     def translateStream(
-            self,
-            stream_in,
-            stream_out=None,
-            progressCallback=None,
-            chunkSize=128,
-            **kwargs
-            ):
-        """Translate a stream (file-like object) chunk by chunk."""
-        # Figure out the size of the input stream
+        self,
+        stream_in,
+        stream_out=None,
+        progressCallback=None,
+        chunkSize=1024 * 4,  # 4KB
+        **kwargs
+    ):
+        """Translate a stream, chunk by chunk."""
+        # Determine size of input stream
         stream_in_size = self._streamSize(stream_in)
 
-        # If no outgoing stream is specified, make one
+        # If no outgoing stream is given, create one
         if not stream_out:
             stream_out = io.BytesIO()
         stream_out_size = 0
 
-        # Make the initial call to the progress function
+        # Make the intializing call to the progress callback
         if progressCallback:
             progressCallback(stream_out_size, stream_in_size)
 
-        # Iterate through chunks
-        for chunk_in in self._readChunks(stream_in, chunkSize):
-            chunk_out = self.translateChunk(chunk_in, **kwargs)
-            stream_out.write(chunk_out)
-            stream_out_size += chunkSize
-            if progressCallback:
-                progressCallback(stream_out_size, stream_in_size)
+        # This is the rotor that all pins will enter through
+        pboard = self.plugboard
+        rotor = self.rotors[0]
 
-        # Return the outgoing stream (in case one wasn't passed in)
-        return stream_out
+        # Iterate over and process chunks
+        for chunk_in in self._readChunks(stream_in, chunkSize):
+
+            # Create the outgoing chunk
+            chunk_out = bytearray()
+
+            # Iterate through bytes and translate them
+            for byte_in in chunk_in:
+
+                # Forward through the plugboard
+                byte_out = pboard[byte_in]
+
+                # Send the pin through the rotors
+                byte_out = rotor.translate(byte_out)
+
+                # Backwards through the plugboard
+                byte_out = pboard[byte_out]
+
+                # Step the rotors
+                rotor.step()
+
+                # Put translated byte into the output chunk
+                chunk_out.append(byte_out)
+
+            # Write the chunk to the output
+            stream_out.write(chunk_out)
 
 
 class RandomMachine(Machine):
